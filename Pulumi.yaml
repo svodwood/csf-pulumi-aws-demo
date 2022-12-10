@@ -1,0 +1,15 @@
+name: csf-pulumi-aws-demo
+description: Demo CSF V1.1 controls using Pulumi
+runtime:
+    name: python
+    options:
+        virtualenv: venv
+template:
+  config:
+    aws:region: 
+        description: Region to deploy the stack into
+        default: us-east-1
+    aws:profile:
+        description: AWS CLI profile name for the account
+    ssh-key-name:
+        description: An EC2 key pair name created prior in the chosen region
