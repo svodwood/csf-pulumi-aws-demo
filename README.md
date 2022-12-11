@@ -39,5 +39,5 @@ Use the button below to provision the stack:
 
 ## Deleting the Stack
 1. Make sure you have the correct AWS CLI profile configured
-2. Manually remove the ALB termination protection attribute from the Application Load Balancer
+2. Manually remove the ALB termination protection attribute from the Application Load Balancer or update the property in code and run 'pulumi up'
 3. Run 'pulumi destroy'
