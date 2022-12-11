@@ -60,6 +60,18 @@ public_network_acl_rule_inbound_110 = ec2.NetworkAclRule("public-nacl-inbound-11
     protocol="tcp",
     rule_action="allow",
     cidr_block="0.0.0.0/0",
+    from_port=443,
+    to_port=443,
+    opts=pulumi.ResourceOptions(parent=public_acl)
+)
+
+public_network_acl_rule_inbound_120 = ec2.NetworkAclRule("public-nacl-inbound-120",
+    network_acl_id=public_acl.id,
+    rule_number=120,
+    egress=False,
+    protocol="tcp",
+    rule_action="allow",
+    cidr_block="0.0.0.0/0",
     from_port=1024,
     to_port=65535,
     opts=pulumi.ResourceOptions(parent=public_acl)
@@ -189,7 +201,7 @@ private_network_acl_rule_outbound_120 = ec2.NetworkAclRule("private-nacl-outboun
     egress=True,
     protocol="tcp",
     rule_action="allow",
-    cidr_block=demo_vpc_cidr,
+    cidr_block="0.0.0.0/0",
     from_port=1024,
     to_port=65535,
     opts=pulumi.ResourceOptions(parent=private_acl)
@@ -224,7 +236,7 @@ for i in range(2):
 
     demo_public_route_table = ec2.RouteTable(f"demo-public-rt-{prefix}",
         vpc_id=demo_vpc.id,
-        tags={**general_tags, "Name": f"demo-spoke-rt-{prefix}"},
+        tags={**general_tags, "Name": f"demo-public-rt-{prefix}"},
         opts=pulumi.ResourceOptions(parent=demo_public_subnet)
     )
     
@@ -250,7 +262,10 @@ for i in range(2):
         allocation_id=demo_eip.id,
         subnet_id=demo_public_subnet.id,
         tags={**general_tags, "Name": f"demo-nat-{prefix}"},
-        opts=pulumi.ResourceOptions(depends_on=[demo_vpc])
+        opts=pulumi.ResourceOptions(
+            depends_on=[demo_vpc],
+            parent=demo_vpc
+        )
     )
 
     demo_private_subnet = ec2.Subnet(f"demo-private-subnet-{prefix}",
@@ -300,7 +315,7 @@ demo_sg_ssm_endpoint = ec2.SecurityGroup("demo-vpc-ssm-security-group",
         from_port=443,
         to_port=443,
         protocol="tcp",
-        cidr_blocks=demo_private_subnet_cidrs
+        cidr_blocks=[demo_vpc_cidr]
     )],
     egress=[ec2.SecurityGroupEgressArgs(
         from_port=0,
@@ -334,7 +349,7 @@ demo_sg_s3_endpoint = ec2.SecurityGroup("demo-vpc-s3-security-group",
         from_port=443,
         to_port=443,
         protocol="tcp",
-        cidr_blocks=demo_private_subnet_cidrs
+        cidr_blocks=[demo_vpc_cidr]
     )],
     egress=[ec2.SecurityGroupEgressArgs(
         from_port=0,

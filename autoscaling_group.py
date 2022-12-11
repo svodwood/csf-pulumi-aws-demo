@@ -4,7 +4,7 @@ from pulumi import ResourceOptions
 
 from user_data import demo_webserver_user_data_b64
 from settings import ssh_key_name, general_tags, cluster_name, nginx_stub_status_port
-from vpc import demo_private_subnets, demo_s3_endpoint, demo_vpc
+from vpc import demo_private_subnets, demo_s3_endpoint, demo_sg_s3_endpoint, demo_vpc
 from alb import demo_target_group, demo_sg_alb
 
 """
@@ -136,8 +136,8 @@ demo_launch_template = ec2.LaunchTemplate("demo-launch-template",
 
 # Creates an autoscaling group:
 demo_autoscaling_group = autoscaling.Group("demo-autoscaling-group",
-    max_size=2,
-    min_size=2,
+    max_size=4,
+    min_size=4,
     name=cluster_name,
     enabled_metrics=["GroupMinSize","GroupMaxSize","GroupDesiredCapacity","GroupInServiceInstances","GroupPendingInstances","GroupStandbyInstances","GroupTerminatingInstances","GroupTotalInstances"],
     vpc_zone_identifiers=demo_private_subnets,
@@ -158,7 +158,10 @@ demo_autoscaling_group = autoscaling.Group("demo-autoscaling-group",
         value="demo-workload-node",
         propagate_at_launch=True
     )],
-    opts=ResourceOptions(ignore_changes=["target_group_arns"])
+    opts=ResourceOptions(
+        ignore_changes=["target_group_arns"],
+        depends_on=[demo_vpc, demo_s3_endpoint, demo_sg_s3_endpoint]
+    )
 )
 
 # Creates an autoscaling group to ALB target group attachment:

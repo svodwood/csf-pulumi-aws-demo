@@ -44,5 +44,5 @@ nginx_stub_status_config_parameter_path = f"/{cluster_name}/nginx_stub_status_co
 Nginx Configuration
 """
 nginx_config_file_path = "/etc/nginx/conf.d/nginx-status.conf"
-nginx_stub_status_port = "8113"
+nginx_stub_status_port = "8080"
 nginx_stub_statuc_path = "metrics"
